@@ -1,5 +1,5 @@
 # CLI
-FROM getsentry/sentry-cli:2 AS sentry-cli
+FROM ghcr.io/sentry-arm/sentry-cli:latest AS sentry-cli
 
 # Image with cargo-chef as base image to our builder
 FROM rust:slim-bookworm AS symbolicator-chef
