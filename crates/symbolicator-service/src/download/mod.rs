@@ -253,7 +253,13 @@ impl DownloadService {
             runtime: runtime.clone(),
             timeouts,
             trusted_client: trusted_client.clone(),
-            sentry: sentry::SentryDownloader::new(trusted_client, runtime, timeouts, in_memory),
+            sentry: sentry::SentryDownloader::new(
+                trusted_client,
+                runtime,
+                timeouts,
+                in_memory,
+                config.propagate_traces,
+            ),
             http: http::HttpDownloader::new(restricted_client.clone(), no_ssl_client, timeouts),
             s3: s3::S3Downloader::new(timeouts, in_memory.s3_client_capacity),
             gcs: gcs::GcsDownloader::new(restricted_client, timeouts, in_memory.gcs_token_capacity),
@@ -570,6 +576,16 @@ async fn download_reqwest(
         );
 
         Err(CacheError::NotFound)
+    } else if status == StatusCode::FOUND {
+        tracing::debug!(
+            "Potential login page detected when downloading from `{}`: {}",
+            source,
+            status
+        );
+
+        Err(CacheError::PermissionDenied(
+            "Potential login page detected".to_string(),
+        ))
     } else {
         tracing::debug!("Unexpected status code from `{}`: {}", source, status);
 

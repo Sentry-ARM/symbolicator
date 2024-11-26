@@ -1,5 +1,28 @@
 # Changelog
 
+## 24.11.0
+
+### Dependencies
+
+- Bump Native SDK from v0.7.10 to v0.7.12 ([#1546](https://github.com/getsentry/symbolicator/pull/1546), [#1550](https://github.com/getsentry/symbolicator/pull/1550))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0712)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.7.10...0.7.12)
+
+## 24.10.0
+
+### Various fixes & improvements
+
+- Added `dry-run` mode to the `cleanup` command that simulates the cleanup
+  without deleting files. ([#1531](https://github.com/getsentry/symbolicator/pull/1531))
+- Parse debug identifiers from scraped JavaScript source files
+  ([#1534](https://github.com/getsentry/symbolicator/pull/1534))
+
+### Dependencies
+
+- Bump Native SDK from v0.7.9 to v0.7.10 ([#1527](https://github.com/getsentry/symbolicator/pull/1527))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0710)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.7.9...0.7.10)
+
 ## 24.9.0
 
 ### Various fixes & improvements
