@@ -1,5 +1,48 @@
 # Changelog
 
+## 25.1.0
+
+### Dependencies
+
+- Bump Native SDK from v0.7.16 to v0.7.17 ([#1573](https://github.com/getsentry/symbolicator/pull/1573))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0717)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.7.16...0.7.17)
+
+## 24.12.1
+
+### Various fixes & improvements
+
+- feat: Bump symcache version (#1572) by @jjbayer
+- chore(deps): Bump symbolic to 12.12.4 (#1571) by @jjbayer
+
+## 24.12.0
+
+### Various fixes & improvements
+
+- chore(deps): update Native SDK to v0.7.16 (#1566) by @github-actions
+
+## 24.11.2
+
+### Various fixes & improvements
+
+- All symbolication endpoints (`symbolicate-{,js,jvm}`, `minidump`, `applecrashreport`)
+  now take an additional `platform` parameter. Stack frames gain this parameter
+  as well. ([#1560](https://github.com/getsentry/symbolicator/pull/1560))
+
+### Dependencies
+
+- Bump Native SDK from v0.7.15 to v0.7.16 ([#1566](https://github.com/getsentry/symbolicator/pull/1566))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0716)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.7.15...0.7.16)
+
+## 24.11.1
+
+### Dependencies
+
+- Bump Native SDK from v0.7.12 to v0.7.15 ([#1555](https://github.com/getsentry/symbolicator/pull/1555))
+  - [changelog](https://github.com/getsentry/sentry-native/blob/master/CHANGELOG.md#0715)
+  - [diff](https://github.com/getsentry/sentry-native/compare/0.7.12...0.7.15)
+
 ## 24.11.0
 
 ### Dependencies

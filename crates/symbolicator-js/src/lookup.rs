@@ -38,7 +38,7 @@ use symbolic::debuginfo::sourcebundle::{
 use symbolic::debuginfo::Object;
 use symbolic::sourcemapcache::SourceMapCache;
 use symbolicator_sources::{
-    HttpRemoteFile, ObjectType, RemoteFile, RemoteFileUri, SentryFileId, SentrySourceConfig,
+    HttpRemoteFile, RemoteFile, RemoteFileUri, SentryFileId, SentrySourceConfig,
 };
 
 use symbolicator_service::caches::{ByteViewString, SourceFilesCache};
@@ -149,26 +149,10 @@ impl SourceMapLookup {
 
         let mut modules_by_abs_path = HashMap::with_capacity(modules.len());
         for module in modules {
-            if module.ty != ObjectType::SourceMap {
-                // TODO(sourcemap): raise an error?
-                continue;
-            }
-            let Some(code_file) = module.code_file.as_ref() else {
-                // TODO(sourcemap): raise an error?
-                continue;
-            };
+            let debug_id = module.debug_id.parse().ok();
+            let cached_module = SourceMapModule::new(&module.code_file, debug_id);
 
-            let debug_id = match &module.debug_id {
-                Some(id) => {
-                    // TODO(sourcemap): raise an error?
-                    id.parse().ok()
-                }
-                None => None,
-            };
-
-            let cached_module = SourceMapModule::new(code_file, debug_id);
-
-            modules_by_abs_path.insert(code_file.to_owned(), cached_module);
+            modules_by_abs_path.insert(module.code_file.to_owned(), cached_module);
         }
 
         let fetcher = ArtifactFetcher {
@@ -683,6 +667,7 @@ impl ArtifactFetcher {
     }
 
     /// Attempt to scrape a file from the web.
+    #[tracing::instrument(skip(self))]
     async fn scrape(&mut self, key: &FileKey) -> CachedFileEntry {
         let Some(abs_path) = key.abs_path() else {
             return CachedFileEntry::empty();
@@ -816,6 +801,7 @@ impl ArtifactFetcher {
         }
     }
 
+    #[tracing::instrument(skip(self))]
     fn try_get_file_from_bundles(&mut self, key: &FileKey) -> Option<CachedFileEntry> {
         if self.artifact_bundles.is_empty() {
             return None;
@@ -905,6 +891,7 @@ impl ArtifactFetcher {
         None
     }
 
+    #[tracing::instrument(skip(self))]
     async fn try_fetch_file_from_artifacts(&mut self, key: &FileKey) -> Option<CachedFileEntry> {
         if self.individual_artifacts.is_empty() {
             return None;
@@ -956,6 +943,7 @@ impl ArtifactFetcher {
     /// Queries the Sentry API for a single file (by its [`DebugId`] and file stem).
     ///
     /// Returns `true` if any new data was made available through this API request.
+    #[tracing::instrument(skip(self))]
     async fn query_sentry_for_file(&mut self, key: &FileKey) -> bool {
         let mut debug_ids = BTreeSet::new();
         let mut file_stems = BTreeSet::new();
@@ -977,6 +965,7 @@ impl ArtifactFetcher {
     /// Individual files are not eagerly downloaded, but their metadata will be available.
     ///
     /// Returns `true` if any new data was made available through this API request.
+    #[tracing::instrument(skip_all)]
     async fn query_sentry_for_files(
         &mut self,
         debug_ids: BTreeSet<DebugId>,
@@ -1061,9 +1050,6 @@ impl ArtifactFetcher {
         resolved_with: ResolvedWith,
     ) -> bool {
         let uri = remote_file.uri();
-        // clippy, you are wrong, as this would result in borrowing errors,
-        // because we are calling a `self` method while borrowing from `self`
-        #[allow(clippy::map_entry)]
         if self.artifact_bundles.contains_key(&uri) {
             return false;
         }

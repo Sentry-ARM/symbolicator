@@ -157,7 +157,21 @@ fn process_file(
             style(obj.arch()).yellow(),
             style(new_filename.display()).cyan(),
         );
-        let mut out = fs::File::create(&new_filename)?;
+
+        let mut out = match fs::File::create_new(&new_filename) {
+            Ok(out) => out,
+            Err(e) if e.kind() == std::io::ErrorKind::AlreadyExists => {
+                eprintln!(
+                    "{}: File {} already exists, you seem to have duplicate debug files for ID {}.\n\
+                    Skipping {filename}.",
+                    style("WARNING").red().bold(),
+                    new_filename.display(),
+                    get_unified_id(&obj).unwrap(),
+                );
+                return Ok(vec![]);
+            }
+            Err(e) => return Err(e.into()),
+        };
 
         if compression_level > 0 {
             copy_encode(obj.data(), &mut out, compression_level)?;
@@ -182,7 +196,7 @@ fn sort_files(sort_config: &SortConfig, paths: Vec<PathBuf>) -> Result<(usize, u
         .into_iter()
         .flat_map(WalkDir::new)
         .filter_map(Result::ok)
-        .filter(|entry| entry.metadata().ok().map_or(false, |x| x.is_file()))
+        .filter(|entry| entry.metadata().is_ok_and(|x| x.is_file()))
         .par_bridge()
         .map(|entry| {
             let path = entry.path();
